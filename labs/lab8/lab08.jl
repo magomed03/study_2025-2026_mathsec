@@ -1,57 +1,7 @@
----
-## Author
-author:
-  name: Магомед Асхабович Мажитов
-  degrees: DSc
-  orcid: 0000-0002-0877-7063
-  email: 1032259381@rudn.ru
-  affiliation:
-    - name: Российский университет дружбы народов
-      country: Российская Федерация
-      postal-code: 117198
-      city: Москва
-      address: ул. Миклухо-Маклая, д. 6
-## Title
-title: "Лабораторная работа №8"
-subtitle: "Целочисленная арифметика многрократнойточности"
-license: CC BY
-date: today
-date-format: "2026-02-03" # Example: 2025-09-06
----
+function zero_extend(u::Vector{Int}, b::Int)
+    return vcat(zeros(Int, b - length(u)), u)
+end
 
-# Информация
-
-## Докладчик
-
-:::::::::::::: {.columns align=center}
-::: {.column width="70%"}
-
-  * Мажитов Магомед Асхабович
-  * студент группы НФИмд-02-25
-  * Российский университет дружбы народов им. П. Лумумбы
-  * <https://github.com/magomed03>
-
-:::
-::: {.column width="30%"}
-
-![](./image/ava.png)
-
-:::
-::::::::::::::
-
-# Вводная часть
-
-Цель:
-
-Цель работы - изучить и реализовать алгоритмы для арифметических операций с большими целыми числами.
-
-Задачи:
-
-Реализовать алгоритмы для арифметических операций с большими целыми числами с помощью языка Julia.
-
-# Алгоритм для сложения чисел
-
-```julia
 function add(u_in, v_in, n, b)
     u = [parse(Int, string(c)) for c in string(u_in)]
     v = [parse(Int, string(c)) for c in string(v_in)]
@@ -61,11 +11,7 @@ function add(u_in, v_in, n, b)
     if length(v) < n
         v = zero_extend(v, n)
     end
-```
 
-# Алгоритм для сложения чисел
-
-```julia
     k = 0
     w = String[]
     for j in n:-1:1
@@ -78,11 +24,7 @@ function add(u_in, v_in, n, b)
     end
     return parse(Int, join(w))
 end
-```
 
-# Алгоритм для вычитания чисел
-
-```julia
 function sub(u_in::Int, v_in::Int, n, b)
     if !(u_in > v_in)
         throw(ArgumentError("Уменьшаемое должно быть больше или равным вычитаемому"))
@@ -92,11 +34,6 @@ function sub(u_in::Int, v_in::Int, n, b)
     if length(u) < n
         u = zero_extend(u, n)
     end
-```
-
-# Алгоритм для вычитания чисел
-
-```julia
     if length(v) < n
         v = zero_extend(v, n)
     end
@@ -113,11 +50,6 @@ function sub(u_in::Int, v_in::Int, n, b)
         end
         w = [string(digit); w]
     end
-```
-
-# Алгоритм для вычитания чисел
-
-```julia
     start_index = 1
     while start_index <= length(w) && w[start_index] == "0"
         start_index += 1
@@ -128,25 +60,18 @@ function sub(u_in::Int, v_in::Int, n, b)
         return parse(Int, join(w[start_index:end]))
     end
 end
-```
 
-# Алгоритм для умножения чисел
-
-```julia
 function mul(u_in::Int, v_in::Int, b::Int)
     u = [parse(Int, string(c)) for c in string(u_in)]
     v = [parse(Int, string(c)) for c in string(v_in)]
     if length(u) < length(v)
         u, v = v, u
     end
+
     m = length(v)
     n = length(u)
     w = zeros(Int, m + n)
-```
 
-# Алгоритм для умножения чисел
-
-```julia
     for j in m:-1:1
         if v[j] == 0
             continue
@@ -162,11 +87,6 @@ function mul(u_in::Int, v_in::Int, b::Int)
             w[j] = k
         end
     end
-```
-
-# Алгоритм для умножения чисел
-
-```julia
     start_index = 1
     while start_index <= length(w) && w[start_index] == 0
         start_index += 1
@@ -177,11 +97,7 @@ function mul(u_in::Int, v_in::Int, b::Int)
         return(parse(Int, join(string.(w[start_index:end]))))
     end
 end
-```
 
-# Быстрый алгоритм для умножения чисел
-
-```julia
 function mul_fast(u_in::Int, v_in::Int, b::Int)
     u = [parse(Int, string(c)) for c in string(u_in)]
     v = [parse(Int, string(c)) for c in string(v_in)]
@@ -191,11 +107,6 @@ function mul_fast(u_in::Int, v_in::Int, b::Int)
     m = length(v)
     n = length(u)
     w = zeros(Int, m + n)
-```
-
-# Быстрый алгоритм для умножения чисел
-
-```julia
     for s in 0:(m + n - 1)
         t = 0
         for i in max(0, s - m + 1):min(s, n - 1)
@@ -204,6 +115,7 @@ function mul_fast(u_in::Int, v_in::Int, b::Int)
                 t += u[n - i] * v[m - j]
             end
         end
+
         w[m + n - s] += t % b
         if s < m + n - 1
             w[m + n - s - 1] += div(t, b)
@@ -211,11 +123,7 @@ function mul_fast(u_in::Int, v_in::Int, b::Int)
     end
     return w
 end
-```
 
-# Алгоритм для деления
-
-```julia
 function divis(u_in::Int, v_in::Int, b::Int)
     if v_in == 0
         throw(ArgumentError("Деление на ноль"))
@@ -223,22 +131,12 @@ function divis(u_in::Int, v_in::Int, b::Int)
     if u_in < v_in
         return 0, u_in
     end
-```
-
-# Алгоритм для деления
-
-```julia
     u = [parse(Int, string(c)) for c in string(u_in)]
     v = [parse(Int, string(c)) for c in string(v_in)]
     n = length(v)
     t = length(u)
     q = zeros(Int, t - n + 1)
     c = 0
-```
-
-# Алгоритм для деления
-
-```julia
     for i in 1:t
         c = c * b + u[i]
         digit = 0
@@ -254,12 +152,7 @@ function divis(u_in::Int, v_in::Int, b::Int)
     r = c
     return a, r
 end
-```
 
-# Результаты
-
-
-```julia
 function main()
     res_1 = add(5, 7, 2, 10)
     println("add result = $res_1")
@@ -272,17 +165,5 @@ function main()
     res_5 = divis(10, 2, 10)
     println("division result = $res_5")
 end
-```
 
-# Результаты
-
-![Результат](image/res.png){#fig-001 width=70%}
-
-# Выводы
-
-С помощью языка программирования Julia были реализованы алгоритмы для арифметических операций с большими целыми числами.
-
-# Список литературы
-
-1. JuliaLang [Электронный ресурс]. 2024 JuliaLang.org contributors. URL: https: //julialang.org/ (дата обращения: 03.02.2026).
-2. Julia 1.11 Documentation [Электронный ресурс]. 2024 JuliaLang.org contributors. URL: https://docs.julialang.org/en/v1/ (дата обращения: 03.02.2026).
+main()

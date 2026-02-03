@@ -1,10 +1,10 @@
 ---
 ## Author
 author:
-  name: Дмитрий Сергеевич Кулябов
+  name: Магомед Асхабович Мажитов
   degrees: DSc
   orcid: 0000-0002-0877-7063
-  email: kulyabov-ds@rudn.ru
+  email: 1032259381@rudn.ru
   affiliation:
     - name: Российский университет дружбы народов
       country: Российская Федерация
@@ -13,53 +13,226 @@ author:
       address: ул. Миклухо-Маклая, д. 6
 
 ## Title
-title: "Шаблон отчёта по лабораторной работе"
-subtitle: "Простейший вариант"
+title: "Лабораторная работа №8"
+subtitle: "Целочисленная арифметика многрократнойточности"
 license: "CC BY"
 ---
 
 # Цель работы
 
-Здесь приводится формулировка цели лабораторной работы.
-Формулировки цели для каждой лабораторной работы приведены в методических указаниях.
-
-Цель данного шаблона --- максимально упростить подготовку отчётов по лабораторным работам.
-Модифицируя данный шаблон, студенты смогут без труда подготовить отчёт по лабораторным работам, а также познакомиться с основными возможностями разметки Markdown.
+Цель работы - изучить и реализовать алгоритмы для арифметических операций с большими целыми числами.
 
 # Задание
 
-Здесь приводится описание задания в соответствии с рекомендациями методического пособия и выданным вариантом.
+Реализовать алгоритмы для арифметических операций с большими целыми числами с помощью языка Julia.
 
 # Теоретическое введение
 
-Здесь описываются теоретические аспекты, связанные с выполнением работы.
+Julia — высокоуровневый свободный язык программирования с динамической типизацией, созданный для математических вычислений[@julialang]. Эффективен также и для написания программ общего назначения. Синтаксис языка схож с синтаксисом других математических языков, однако имеет некоторые существенные отличия.
 
-Например, в [табл. @tbl-std-dir] приведено краткое описание стандартных каталогов Unix.
-
-| Имя каталога | Описание каталога                                                                                                          |
-|--------------|----------------------------------------------------------------------------------------------------------------------------|
-| `/`          | Корневая директория, содержащая всю файловую                                                                               |
-| `/bin `      | Основные системные утилиты, необходимые как в однопользовательском режиме, так и при обычной работе всем пользователям     |
-| `/etc`       | Общесистемные конфигурационные файлы и файлы конфигурации установленных программ                                           |
-| `/home`      | Содержит домашние директории пользователей, которые, в свою очередь, содержат персональные настройки и данные пользователя |
-| `/media`     | Точки монтирования для сменных носителей                                                                                   |
-| `/root`      | Домашняя директория пользователя  `root`                                                                                   |
-| `/tmp`       | Временные файлы                                                                                                            |
-| `/usr`       | Вторичная иерархия для данных пользователя                                                                                 |
-
-: Описание некоторых каталогов файловой системы GNU Linux {#tbl-std-dir}
-
-Более подробно про Unix см. в [@tanenbaum_book_modern-os_ru; @robbins_book_bash_en; @zarrelli_book_mastering-bash_en; @newham_book_learning-bash_en].
+Для выполнения заданий была использована официальная документация Julia[@juliadoc].
 
 # Выполнение лабораторной работы
 
-Описываются проведённые действия, в качестве иллюстрации даётся ссылка на иллюстрацию ([рис. @fig-001]).
+Реализуем алгоритм для сложения чисел.
 
-![V Сольвеевский конгресс (1927) «Электроны и фотоны»](image/solvay.jpg){#fig-001 width=70%}
+```julia
+function zero_extend(u::Vector{Int}, b::Int)
+    return vcat(zeros(Int, b - length(u)), u)
+end
+
+function add(u_in, v_in, n, b)
+    u = [parse(Int, string(c)) for c in string(u_in)]
+    v = [parse(Int, string(c)) for c in string(v_in)]
+    if length(u) < n
+        u = zero_extend(u, n)
+    end
+    if length(v) < n
+        v = zero_extend(v, n)
+    end
+
+    k = 0
+    w = String[]
+    for j in n:-1:1
+        sum_val = u[j] + v[j] + k
+        w = [string(sum_val % b); w]
+        k = div(sum_val, b)
+        if j == 1 && k != 0
+            w = [string(k); w]
+        end 
+    end
+    return parse(Int, join(w))
+end
+```
+
+Реализуем алгоритм для вычитания.
+
+```julia
+function sub(u_in::Int, v_in::Int, n, b)
+    if !(u_in > v_in)
+        throw(ArgumentError("Уменьшаемое должно быть больше или равным вычитаемому"))
+    end
+    u = [parse(Int, string(c)) for c in string(u_in)]
+    v = [parse(Int, string(c)) for c in string(v_in)]
+    if length(u) < n
+        u = zero_extend(u, n)
+    end
+    if length(v) < n
+        v = zero_extend(v, n)
+    end
+    k = 0
+    w = String[]
+    for j in n:-1:1
+        diff_val = u[j] - v[j] + k
+        if diff_val < 0
+            digit = diff_val + b
+            k = -1
+        else
+            digit = diff_val
+            k = 0
+        end
+        w = [string(digit); w]
+    end
+    start_index = 1
+    while start_index <= length(w) && w[start_index] == "0"
+        start_index += 1
+    end
+    if start_index > length(w)
+        return 0
+    else
+        return parse(Int, join(w[start_index:end]))
+    end
+end
+```
+
+Реализуем алгоритм для умножения чисел.
+
+```julia
+function mul(u_in::Int, v_in::Int, b::Int)
+    u = [parse(Int, string(c)) for c in string(u_in)]
+    v = [parse(Int, string(c)) for c in string(v_in)]
+    if length(u) < length(v)
+        u, v = v, u
+    end
+
+    m = length(v)
+    n = length(u)
+    w = zeros(Int, m + n)
+
+    for j in m:-1:1
+        if v[j] == 0
+            continue
+        else
+            i = n
+            k = 0
+            while i >= 1
+                t = u[i] * v[j] + w[i + j ] + k
+                w[i + j] = t % b
+                k = div(t, b)
+                i -= 1
+            end
+            w[j] = k
+        end
+    end
+    start_index = 1
+    while start_index <= length(w) && w[start_index] == 0
+        start_index += 1
+    end
+    if start_index > length(w)
+        return 0 
+    else
+        return(parse(Int, join(string.(w[start_index:end]))))
+    end
+end
+```
+
+Реализуем более быстрый алгоритм для умножения чисел.
+
+```julia
+function mul_fast(u_in::Int, v_in::Int, b::Int)
+    u = [parse(Int, string(c)) for c in string(u_in)]
+    v = [parse(Int, string(c)) for c in string(v_in)]
+    if length(u) < length(v)
+        u, v = v, u
+    end
+    m = length(v)
+    n = length(u)
+    w = zeros(Int, m + n)
+    for s in 0:(m + n - 1)
+        t = 0
+        for i in max(0, s - m + 1):min(s, n - 1)
+            j = s - i
+            if j < m
+                t += u[n - i] * v[m - j]
+            end
+        end
+
+        w[m + n - s] += t % b
+        if s < m + n - 1
+            w[m + n - s - 1] += div(t, b)
+        end
+    end
+    return w
+end
+```
+
+Реализуем алгоритм для деления.
+
+```julia
+function divis(u_in::Int, v_in::Int, b::Int)
+    if v_in == 0
+        throw(ArgumentError("Деление на ноль"))
+    end
+    if u_in < v_in
+        return 0, u_in
+    end
+    u = [parse(Int, string(c)) for c in string(u_in)]
+    v = [parse(Int, string(c)) for c in string(v_in)]
+    n = length(v)
+    t = length(u)
+    q = zeros(Int, t - n + 1)
+    c = 0
+    for i in 1:t
+        c = c * b + u[i]
+        digit = 0
+        while c >= v_in
+            c -= v_in
+            digit += 1
+        end
+        if i >= n
+            q[i - n + 1] = digit
+        end
+    end
+    a = parse(Int, join(string.(q)))
+    r = c
+    return a, r
+end
+```
+
+Для вывода результата используем функцию main.
+
+```julia
+function main()
+    res_1 = add(5, 7, 2, 10)
+    println("add result = $res_1")
+    res_2 = sub(12, 7, 2, 10)
+    println("sub result = $res_2")
+    res_3 = mul(5, 7, 10)
+    println("multiply result = $res_3")
+    res_4 = mul_fast(7, 5, 10)
+    println("fast multiply result = $res_4")
+    res_5 = divis(10, 2, 10)
+    println("division result = $res_5")
+end
+```
+
+Результат работы программы ([рис. @fig-001]).
+
+![Результат](image/res.png){#fig-001 width=70%}
 
 # Выводы
 
-Здесь кратко описываются итоги проделанной работы.
+С помощью языка программирования Julia были реализованы алгоритмы для арифметических операций с большими целыми числами.
 
 # Список литературы{.unnumbered}
 

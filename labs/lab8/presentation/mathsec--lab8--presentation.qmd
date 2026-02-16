@@ -1,10 +1,10 @@
 ---
 ## Author
 author:
-  name: Дмитрий Сергеевич Кулябов
+  name: Магомед Асхабович Мажитов
   degrees: DSc
   orcid: 0000-0002-0877-7063
-  email: kulyabov-ds@rudn.ru
+  email: 1032259381@rudn.ru
   affiliation:
     - name: Российский университет дружбы народов
       country: Российская Федерация
@@ -12,11 +12,11 @@ author:
       city: Москва
       address: ул. Миклухо-Маклая, д. 6
 ## Title
-title: Структура научной презентации
-subtitle: Простейший вариант
+title: "Лабораторная работа №8"
+subtitle: "Целочисленная арифметика многрократнойточности"
 license: CC BY
 date: today
-date-format: "YYYY-MM-DD" # Example: 2025-09-06
+date-format: "2026-02-03" # Example: 2025-09-06
 ---
 
 # Информация
@@ -26,175 +26,263 @@ date-format: "YYYY-MM-DD" # Example: 2025-09-06
 :::::::::::::: {.columns align=center}
 ::: {.column width="70%"}
 
-  * Кулябов Дмитрий Сергеевич
-  * д.ф.-м.н., профессор
-  * профессор кафедры теории вероятностей и кибербезопасности
+  * Мажитов Магомед Асхабович
+  * студент группы НФИмд-02-25
   * Российский университет дружбы народов им. П. Лумумбы
-  * [kulyabov-ds@rudn.ru](mailto:kulyabov-ds@rudn.ru)
-  * <https://yamadharma.github.io/ru/>
+  * <https://github.com/magomed03>
 
 :::
 ::: {.column width="30%"}
 
-![](./image/kulyabov.jpg)
+![](./image/ava.png)
 
 :::
 ::::::::::::::
 
 # Вводная часть
 
-## Актуальность
+Цель:
 
-- Важно донести результаты своих исследований до окружающих
-- Научная презентация --- рабочий инструмент исследователя
-- Необходимо создавать презентацию быстро
-- Желательна минимизация усилий для создания презентации
+Цель работы - изучить и реализовать алгоритмы для арифметических операций с большими целыми числами.
 
-## Объект и предмет исследования
+Задачи:
 
-- Презентация как текст
-- Программное обеспечение для создания презентаций
-- Входные и выходные форматы презентаций
+Реализовать алгоритмы для арифметических операций с большими целыми числами с помощью языка Julia.
 
-## Цели и задачи
+# Алгоритм для сложения чисел
 
-- Создать шаблон презентации в Markdown
-- Описать алгоритм создания выходных форматов презентаций
-
-## Материалы и методы
-
-- Процессор `pandoc` для входного формата Markdown
-- Результирующие форматы
-	- `pdf`
-	- `html`
-- Автоматизация процесса создания: `Makefile`
-
-# Создание презентации
-
-## Процессор `pandoc`
-
-- Pandoc: преобразователь текстовых файлов
-- Сайт: <https://pandoc.org/>
-- Репозиторий: <https://github.com/jgm/pandoc>
-
-## Формат `pdf`
-
-- Использование LaTeX
-- Пакет для презентации: [beamer](https://ctan.org/pkg/beamer)
-- Тема оформления: `metropolis`
-
-## Код для формата `pdf`
-
-```yaml
-slide_level: 2
-aspectratio: 169
-section-titles: true
-theme: metropolis
+```julia
+function add(u_in, v_in, n, b)
+    u = [parse(Int, string(c)) for c in string(u_in)]
+    v = [parse(Int, string(c)) for c in string(v_in)]
+    if length(u) < n
+        u = zero_extend(u, n)
+    end
+    if length(v) < n
+        v = zero_extend(v, n)
+    end
 ```
 
-## Формат `html`
+# Алгоритм для сложения чисел
 
-- Используется фреймворк [reveal.js](https://revealjs.com/)
-- Используется [тема](https://revealjs.com/themes/) `beige`
-
-## Код для формата `html`
-
-- Тема задаётся в файле `Makefile`
-
-```make
-REVEALJS_THEME = beige
+```julia
+    k = 0
+    w = String[]
+    for j in n:-1:1
+        sum_val = u[j] + v[j] + k
+        w = [string(sum_val % b); w]
+        k = div(sum_val, b)
+        if j == 1 && k != 0
+            w = [string(k); w]
+        end 
+    end
+    return parse(Int, join(w))
+end
 ```
+
+# Алгоритм для вычитания чисел
+
+```julia
+function sub(u_in::Int, v_in::Int, n, b)
+    if !(u_in > v_in)
+        throw(ArgumentError("Уменьшаемое должно быть больше или равным вычитаемому"))
+    end
+    u = [parse(Int, string(c)) for c in string(u_in)]
+    v = [parse(Int, string(c)) for c in string(v_in)]
+    if length(u) < n
+        u = zero_extend(u, n)
+    end
+```
+
+# Алгоритм для вычитания чисел
+
+```julia
+    if length(v) < n
+        v = zero_extend(v, n)
+    end
+    k = 0
+    w = String[]
+    for j in n:-1:1
+        diff_val = u[j] - v[j] + k
+        if diff_val < 0
+            digit = diff_val + b
+            k = -1
+        else
+            digit = diff_val
+            k = 0
+        end
+        w = [string(digit); w]
+    end
+```
+
+# Алгоритм для вычитания чисел
+
+```julia
+    start_index = 1
+    while start_index <= length(w) && w[start_index] == "0"
+        start_index += 1
+    end
+    if start_index > length(w)
+        return 0
+    else
+        return parse(Int, join(w[start_index:end]))
+    end
+end
+```
+
+# Алгоритм для умножения чисел
+
+```julia
+function mul(u_in::Int, v_in::Int, b::Int)
+    u = [parse(Int, string(c)) for c in string(u_in)]
+    v = [parse(Int, string(c)) for c in string(v_in)]
+    if length(u) < length(v)
+        u, v = v, u
+    end
+    m = length(v)
+    n = length(u)
+    w = zeros(Int, m + n)
+```
+
+# Алгоритм для умножения чисел
+
+```julia
+    for j in m:-1:1
+        if v[j] == 0
+            continue
+        else
+            i = n
+            k = 0
+            while i >= 1
+                t = u[i] * v[j] + w[i + j ] + k
+                w[i + j] = t % b
+                k = div(t, b)
+                i -= 1
+            end
+            w[j] = k
+        end
+    end
+```
+
+# Алгоритм для умножения чисел
+
+```julia
+    start_index = 1
+    while start_index <= length(w) && w[start_index] == 0
+        start_index += 1
+    end
+    if start_index > length(w)
+        return 0 
+    else
+        return(parse(Int, join(string.(w[start_index:end]))))
+    end
+end
+```
+
+# Быстрый алгоритм для умножения чисел
+
+```julia
+function mul_fast(u_in::Int, v_in::Int, b::Int)
+    u = [parse(Int, string(c)) for c in string(u_in)]
+    v = [parse(Int, string(c)) for c in string(v_in)]
+    if length(u) < length(v)
+        u, v = v, u
+    end
+    m = length(v)
+    n = length(u)
+    w = zeros(Int, m + n)
+```
+
+# Быстрый алгоритм для умножения чисел
+
+```julia
+    for s in 0:(m + n - 1)
+        t = 0
+        for i in max(0, s - m + 1):min(s, n - 1)
+            j = s - i
+            if j < m
+                t += u[n - i] * v[m - j]
+            end
+        end
+        w[m + n - s] += t % b
+        if s < m + n - 1
+            w[m + n - s - 1] += div(t, b)
+        end
+    end
+    return w
+end
+```
+
+# Алгоритм для деления
+
+```julia
+function divis(u_in::Int, v_in::Int, b::Int)
+    if v_in == 0
+        throw(ArgumentError("Деление на ноль"))
+    end
+    if u_in < v_in
+        return 0, u_in
+    end
+```
+
+# Алгоритм для деления
+
+```julia
+    u = [parse(Int, string(c)) for c in string(u_in)]
+    v = [parse(Int, string(c)) for c in string(v_in)]
+    n = length(v)
+    t = length(u)
+    q = zeros(Int, t - n + 1)
+    c = 0
+```
+
+# Алгоритм для деления
+
+```julia
+    for i in 1:t
+        c = c * b + u[i]
+        digit = 0
+        while c >= v_in
+            c -= v_in
+            digit += 1
+        end
+        if i >= n
+            q[i - n + 1] = digit
+        end
+    end
+    a = parse(Int, join(string.(q)))
+    r = c
+    return a, r
+end
+```
+
 # Результаты
 
-## Получающиеся форматы
 
-- Полученный `pdf`-файл можно демонстрировать в любой программе просмотра `pdf`
-- Полученный `html`-файл содержит в себе все ресурсы: изображения, css, скрипты
+```julia
+function main()
+    res_1 = add(5, 7, 2, 10)
+    println("add result = $res_1")
+    res_2 = sub(12, 7, 2, 10)
+    println("sub result = $res_2")
+    res_3 = mul(5, 7, 10)
+    println("multiply result = $res_3")
+    res_4 = mul_fast(7, 5, 10)
+    println("fast multiply result = $res_4")
+    res_5 = divis(10, 2, 10)
+    println("division result = $res_5")
+end
+```
 
-# Элементы презентации
+# Результаты
 
-## Актуальность
+![Результат](image/res.png){#fig-001 width=70%}
 
-- Даёт понять, о чём пойдёт речь
-- Следует широко и кратко описать проблему
-- Мотивировать свое исследование
-- Сформулировать цели и задачи
-- Возможна формулировка ожидаемых результатов
+# Выводы
 
-## Цели и задачи
+С помощью языка программирования Julia были реализованы алгоритмы для арифметических операций с большими целыми числами.
 
-- Не формулируйте более 1--2 целей исследования
+# Список литературы
 
-## Материалы и методы
-
-- Представляйте данные качественно
-- Количественно, только если крайне необходимо
-- Излишние детали не нужны
-
-## Содержание исследования
-
-- Предлагаемое решение задач исследования с обоснованием
-- Основные этапы работы
-
-## Результаты
-
-- Не нужны все результаты
-- Необходимы логические связки между слайдами
-- Необходимо показать понимание материала
-
-
-## Итоговый слайд
-
-- Запоминается последняя фраза. © Штирлиц
-- Главное сообщение, которое вы хотите донести до слушателей
-- Избегайте использовать последний слайд вида *Спасибо за внимание*
-
-# Рекомендую
-
-## Принцип 10/20/30
-
-  - 10 слайдов
-  - 20 минут на доклад
-  - 30 кегль шрифта
-
-## Связь слайдов
-
-::: incremental
-
-- Один слайд --- одна мысль
-- Нельзя ссылаться на объекты, находящиеся на предыдущих слайдах (например, на формулы)
-- Каждый слайд должен иметь заголовок
-
-:::
-
-## Количество сущностей
-
-::: incremental
-
-- Человек может одновременно помнить $7 \pm 2$ элемента
-- При размещении информации на слайде старайтесь чтобы в сумме слайд содержал не более 5 элементов
-- Можно группировать элементы так, чтобы визуально было не более 5 групп
-
-:::
-
-## Общие рекомендации
-
-::: incremental
-
-- На слайд выносится та информация, которая без зрительной опоры воспринимается хуже
-- Слайды должны дополнять или обобщать содержание выступления или его частей, а не дублировать его
-- Информация на слайдах должна быть изложена кратко, чётко и хорошо структурирована
-- Слайд не должен быть перегружен графическими изображениями и текстом
-- Не злоупотребляйте анимацией и переходами
-
-:::
-
-## Представление данных
-
-::: incremental
-
-- Лучше представить в виде схемы
-- Менее оптимально представить в виде рисунка, графика, таблицы
-- Текст используется, если все предыдущие способы отображения информации не подошли
-
-:::
+1. JuliaLang [Электронный ресурс]. 2024 JuliaLang.org contributors. URL: https: //julialang.org/ (дата обращения: 03.02.2026).
+2. Julia 1.11 Documentation [Электронный ресурс]. 2024 JuliaLang.org contributors. URL: https://docs.julialang.org/en/v1/ (дата обращения: 03.02.2026).
